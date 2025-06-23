@@ -1,5 +1,6 @@
 
 #include "llvm/Analysis/MLUnrollAdvisor.h"
+#include "llvm/ADT/Statistic.h"
 #include "llvm/Analysis/LoopPropertiesAnalysis.h"
 #include "llvm/Analysis/UnrollAdvisor.h"
 #include "llvm/Analysis/UnrollModelFeatureMaps.h"
@@ -10,6 +11,8 @@
 
 #define DEBUG_TYPE "loop-unroll-ml-advisor"
 #define DBGS() llvm::dbgs() << "mlgo-loop-unroll: "
+
+STATISTIC(NumDecisions, "Number of unrolling decisions made");
 
 using namespace llvm;
 using namespace llvm::mlgo;
@@ -28,6 +31,8 @@ llvm::getReleaseModeUnrollAdvisor(LLVMContext &Ctx) {
 
 std::unique_ptr<UnrollAdvice>
 MLUnrollAdvisor::getAdviceImpl(UnrollAdviceInfo UAI) {
+  ++NumDecisions;
+
   LoopPropertiesInfo LPI = LoopPropertiesInfo::get(
       UAI.L, UAI.LI, UAI.SE, UAI.TTI, UAI.TLI, UAI.AA, UAI.DT, UAI.AC);
 
@@ -155,9 +160,7 @@ MLUnrollAdvisor::getAdviceImpl(UnrollAdviceInfo UAI) {
   std::optional<unsigned> Factor = convertUnrollDecisionToAdviceFactor(UD);
   if (!Factor) {
     LLVM_DEBUG(DBGS() << "got advice nodecision\n");
-  } else if (*Factor == 0) {
-    LLVM_DEBUG(DBGS() << "got advice nounroll\n");
-  } else if (*Factor == 1) {
+  } else {
     LLVM_DEBUG(DBGS() << "got advice factor " << *Factor << "\n");
   }
 
