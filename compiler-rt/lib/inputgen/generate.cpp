@@ -4,6 +4,7 @@
 #include "timer.h"
 #include "vm_choices.h"
 #include "vm_obj.h"
+#include "span.h"
 
 #include <bit>
 #include <condition_variable>
@@ -13,7 +14,6 @@
 #include <string>
 #include <string_view>
 #include <thread>
-#include <span>
 
 // We are depending on this = false to be embedded as an initial value in the
 // global of the binary so that we have it set to false before we get the call
@@ -33,7 +33,7 @@ uint32_t OriginalSeed;
 using namespace __ig;
 
 struct SharedState {
-  SharedState(uint32_t NumThreads, std::span<uint32_t> Seeds)
+  SharedState(uint32_t NumThreads, span<uint32_t> Seeds)
       : CM(NumThreads), Counter(0), NumThreads(NumThreads), Seeds(Seeds) {}
 
   ChoiceManager CM;
@@ -54,7 +54,7 @@ struct SharedState {
   std::mutex Mutex;
 
   std::condition_variable FinishedCV;
-  std::span<uint32_t> Seeds;
+  span<uint32_t> Seeds;
 };
 
 static uint32_t ThreadID = 0;
@@ -161,7 +161,7 @@ int main(int argc, char **argv) {
   std::vector<uint32_t> Seeds;
   for (uint32_t I = 0; I < NumInputs; ++I)
     Seeds.push_back(Generator());
-  std::span<uint32_t> SeedsSpan{Seeds.data() - FirstInput,
+  span<uint32_t> SeedsSpan{Seeds.data() - FirstInput,
                                 FirstInput + NumInputs};
 
   SharedState SS(NumThreads, SeedsSpan);
