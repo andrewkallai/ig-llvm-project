@@ -12,7 +12,7 @@ void printAvailableFunctions() {
     std::cerr << "    " << I << ": " << __ig_entry_point_names[I] << "\n";
 }
 void printNumAvailableFunctions() {
-  std::cerr << "  Num available functions: %\n" << __ig_num_entry_points;
+  std::cerr << "  Num available functions: " << __ig_num_entry_points << "\n";
 }
 
 IG_API_ATTRS
